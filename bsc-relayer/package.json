@@ -1,0 +1,22 @@
+{
+  "name": "anet-bsc-relayer",
+  "version": "1.0.0",
+  "description": "Relays AnetSwap (BSC) → ANET L1 mints with 12-confirmation finality and Postgres idempotency.",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "migrate": "node scripts/migrate.js",
+    "generate-key": "node scripts/generate-key.js",
+    "dry-run": "DRY_RUN=true node src/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "ethers": "^6.13.4",
+    "pg": "^8.13.1",
+    "undici": "^7.2.0"
+  }
+}

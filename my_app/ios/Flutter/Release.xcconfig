@@ -1,0 +1,7 @@
+#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"
+#include "Generated.xcconfig"
+// GAD_APPLICATION_ID removed (Google AdSense/AdMob ban). Axon ads TBD.
+CODE_SIGN_STYLE=Manual
+CODE_SIGN_IDENTITY=Apple Distribution
+DEVELOPMENT_TEAM=L792KSQ9VC
+PROVISIONING_PROFILE_SPECIFIER=A Network App Store

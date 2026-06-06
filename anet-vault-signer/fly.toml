@@ -1,0 +1,24 @@
+# anet-vault-signer — signer3 deployed to Fly.io
+# Singapore region (closest free region to Philippines / Asia-Pacific).
+# This is a worker process — no public HTTP port.
+
+app = "anet-vault-signer-3"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+# Single VM, always-on. The signer only works if it's up to poll burns.
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+  cpus = 1
+
+[deploy]
+  strategy = "immediate"
+
+# No [http_service] block on purpose — this daemon doesn't accept inbound traffic.
+# It only makes outbound HTTPS calls to L1_BASE_URL.
+
+[processes]
+  signer = "node src/index.js"

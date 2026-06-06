@@ -1,0 +1,54 @@
+workflows:
+  ios-release:
+    name: iOS Release Build for App Store
+    instance_type: mac_mini_m1
+    max_build_duration: 60
+    environment:
+      vars:
+        XCODE_WORKSPACE: "ios/Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+        BUNDLE_ID: "com.anetwork.app"
+      ios_signing:
+        distribution_type: app_store
+        bundle_id: com.anetwork.app
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+    scripts:
+      - name: Install Flutter dependencies
+        script: |
+          cd my_app
+          flutter pub get
+          flutter clean
+      - name: Build Flutter for iOS
+        script: |
+          cd my_app
+          flutter build ios --release --no-codesign
+      - name: Create iOS Archive
+        script: |
+          cd my_app/ios
+          xcodebuild -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -derivedDataPath build/ios_build \
+            -archivePath "build/ios_build/Runner.xcarchive" \
+            -allowProvisioningUpdates \
+            archive
+      - name: Export IPA
+        script: |
+          cd my_app/ios
+          xcodebuild -exportArchive \
+            -archivePath "build/ios_build/Runner.xcarchive" \
+            -exportPath "build/ios_build" \
+            -exportOptionsPlist ExportOptions.plist
+    artifacts:
+      - my_app/ios/build/ios_build/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - Internal Testers

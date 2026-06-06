@@ -1,0 +1,10 @@
+# Don't bake local dev files into the Fly image
+node_modules
+.env
+.env.*
+.git
+.gitignore
+.DS_Store
+DEPLOYMENT.md
+README.md
+*.log

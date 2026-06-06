@@ -1,0 +1,74 @@
+# Render blueprint for the ANET BSC→L1 relayer.
+#
+# To deploy:
+#   1. Push this repo to GitHub.
+#   2. In Render → New + → Blueprint, pick this file.
+#   3. Set the required env vars on the worker (see .env.example).
+#   4. The Postgres add-on below is free-tier; upgrade to "starter" for prod.
+#
+# After first deploy, run `npm run migrate` once from the Render shell.
+
+services:
+  - type: worker
+    name: anet-bsc-relayer
+    env: node
+    plan: starter
+    region: oregon
+    rootDir: bsc-relayer
+    buildCommand: npm install
+    startCommand: node src/index.js
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: BSC_RPC_URL
+        value: https://bsc-dataseed1.binance.org/
+      - key: BSC_RPC_URL_FALLBACK
+        value: https://bsc-dataseed2.binance.org/
+      - key: ANET_SWAP_CONTRACT
+        value: 0x1A1AFE5BF1ffDB64aC10958cCe2D06B22Fb47Fb8
+      - key: MIN_CONFIRMATIONS
+        value: 12
+      - key: SCAN_CHUNK_BLOCKS
+        value: 2000
+      - key: START_BLOCK
+        value: 99500000
+      - key: POLL_INTERVAL_MS
+        value: 5000
+      - key: ANET_L1_BASE_URL
+        value: https://anet-private-mainnet.onrender.com
+      - key: MAX_MINT_PER_TX_ANET
+        value: 10000
+      - key: MAX_MINT_PER_DAY_ANET
+        value: 100000
+      - key: DRY_RUN
+        value: true                      # FLIP TO false AFTER 24h OF VERIFIED LOGS
+      - key: LOG_LEVEL
+        value: info
+      - key: ANET_DEX_ADMIN_KEY
+        sync: false                      # paste the generated secret in dashboard
+      - key: DATABASE_URL
+        fromDatabase:
+          name: anet-relayer-db
+          property: connectionString
+      # ── L1 → BSC bridge (burn-and-release) ───────────────────────────
+      - key: BRIDGE_BURN_ENABLED
+        value: false                     # FLIP TO true AFTER ESCROW IS FUNDED
+      - key: L1_BURN_POLL_INTERVAL_MS
+        value: 500
+      - key: BSC_ANET_TOKEN
+        value: 0x791055A7d52AA392eaE8De04250497f33807E46A
+      - key: BSC_ANET_DECIMALS
+        value: 18
+      - key: BSC_ESCROW_PRIVATE_KEY
+        sync: false                      # generate with scripts/generate-escrow-wallet.js
+      - key: MAX_RELEASE_PER_TX_ANET
+        value: 10000
+      - key: MAX_RELEASE_PER_DAY_ANET
+        value: 100000
+
+databases:
+  - name: anet-relayer-db
+    plan: free
+    region: oregon
+    postgresMajorVersion: 16

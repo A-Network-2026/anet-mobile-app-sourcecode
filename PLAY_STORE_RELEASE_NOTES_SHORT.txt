@@ -1,0 +1,26 @@
+🔧 Bug Fixes & Performance Improvements
+
+✅ Fixed critical ANR (crash) issues
+  • Resolved notification permission delays blocking app responsiveness
+  • Improved voice control (TTS) latency  
+  • Optimized ad loading to prevent UI freezes
+
+✅ Mining & Session Improvements
+✅ Authentication & Security
+  • Fixed Bearer token corruption errors from secure storage
+  • Added automatic token validation and recovery
+  • Users experiencing "invalid HTTP header" errors will now auto-recover
+
+✅ Mining & Session Improvements
+  • Real-time session rewards now display correctly
+  • 6-hour Ant Work tracking stability restored
+  • Better offline session handling
+
+✅ Ad Serving Enhancements
+  • Rewarded ad units now correctly route to token rewards
+  • Ads load asynchronously without blocking Ant Work startup
+  • Improved fallback when ad inventory unavailable
+
+⚠️ Note: AdMob ad serving may be temporarily limited (traffic quality review in progress). This does not affect mining or session tracking.
+
+Update now for a faster, more stable Ant Work experience!

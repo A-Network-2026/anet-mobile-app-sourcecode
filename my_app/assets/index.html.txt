@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>A Network dApp</title>
+<link rel="icon" type="image/png" href="logo.png" />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Orbitron',sans-serif;background:#000814;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
+
+.container{
+  width:100%;
+  max-width:900px;
+  text-align:center;
+}
+
+h1{font-size:clamp(24px,5vw,40px)}
+p{font-size:clamp(12px,2.5vw,16px);opacity:.8}
+
+button{
+  padding:clamp(10px,2vw,14px) clamp(18px,4vw,28px);
+  margin:8px;
+  border:none;
+  border-radius:25px;
+  background:linear-gradient(90deg,#00c3ff,#0066ff);
+  color:#fff;
+  cursor:pointer;
+  font-size:clamp(12px,2.5vw,15px);
+}
+
+.card{
+  margin-top:20px;
+  padding:clamp(15px,3vw,25px);
+  border:1px solid rgba(0,195,255,.3);
+  border-radius:15px;
+  background:rgba(0,0,0,.5)
+}
+
+.metrics{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:15px;
+  margin-top:20px;
+}
+
+.metric{
+  flex:1 1 120px;
+  max-width:200px;
+  background:rgba(0,0,0,.5);
+  border:1px solid rgba(0,195,255,.3);
+  padding:clamp(10px,2vw,18px);
+  border-radius:12px;
+}
+
+.metric h3{font-size:clamp(14px,3vw,18px);color:#00c3ff}
+.metric p{font-size:12px;opacity:.7}
+
+input{
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  margin-top:10px;
+  text-align:center;
+  width:clamp(150px,50%,300px);
+}
+
+@media(max-width:500px){
+  .container{padding:10px}
+  button{width:100%;max-width:280px}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>A NETWORK dApp</h1>
+  <p>Web3 → Web4 Autonomous Interface</p>
+
+  <button onclick="connectWallet()">Connect Wallet</button>
+  <button onclick="getBalance()">Check ANET Balance</button>
+  <button onclick="getPrice()">Get Price</button>
+
+  <a href="https://pancakeswap.finance/swap?outputCurrency=0x791055A7d52AA392eaE8De04250497f33807E46A" target="_blank">
+    <button>Buy ANET</button>
+  </a>
+
+  <div class="metrics">
+    <div class="metric"><h3 id="status">Not Connected</h3><p>Wallet</p></div>
+    <div class="metric"><h3 id="balance">-</h3><p>ANET</p></div>
+    <div class="metric"><h3 id="price">-</h3><p>USD</p></div>
+  </div>
+
+  <div class="card">
+    <h3>Web4 Auto System</h3>
+    <p>Auto-trigger based on price</p>
+
+    <input id="targetPrice" placeholder="Enter target price (e.g. 3.5)" />
+    <br>
+    <button onclick="startAuto()">Start Auto</button>
+    <button onclick="stopAuto()">Stop</button>
+
+    <p id="autoStatus">Idle</p>
+  </div>
+</div>
+
+<script>
+let provider, signer, userAddress;
+const tokenAddress = "0x791055A7d52AA392eaE8De04250497f33807E46A";
+
+const abi = [
+  "function balanceOf(address owner) view returns (uint256)",
+  "function decimals() view returns (uint8)"
+];
+
+let autoInterval = null;
+
+async function connectWallet(){
+  if(window.ethereum){
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    signer = provider.getSigner();
+    userAddress = await signer.getAddress();
+
+    document.getElementById("status").innerText = userAddress.slice(0,6)+"...";
+  } else {
+    alert("Install MetaMask");
+  }
+}
+
+async function getBalance(){
+  if(!provider) return alert("Connect wallet first");
+
+  const contract = new ethers.Contract(tokenAddress, abi, provider);
+  const balance = await contract.balanceOf(userAddress);
+  const decimals = await contract.decimals();
+
+  const formatted = ethers.utils.formatUnits(balance, decimals);
+  document.getElementById("balance").innerText = formatted;
+}
+
+async function getPrice(){
+  const res = await fetch("https://api.dexscreener.com/latest/dex/pairs/bsc/0xb90071e377a31a6ea2cfdebe19a4d5226c420b6b");
+  const data = await res.json();
+
+  const price = parseFloat(data.pair.priceUsd);
+  document.getElementById("price").innerText = "$" + price.toFixed(4);
+  return price;
+}
+
+function startAuto(){
+  const target = parseFloat(document.getElementById("targetPrice").value);
+  if(!target) return alert("Enter target price");
+
+  document.getElementById("autoStatus").innerText = "Running...";
+
+  autoInterval = setInterval(async ()=>{
+    const current = await getPrice();
+    if(current <= target){
+      document.getElementById("autoStatus").innerText = "Target reached";
+    }
+  }, 5000);
+}
+
+function stopAuto(){
+  clearInterval(autoInterval);
+  document.getElementById("autoStatus").innerText = "Stopped";
+}
+</script>
+
+</body>
+</html>

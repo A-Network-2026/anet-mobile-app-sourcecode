@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>A Network</title>
+
+<link rel="icon" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:'Orbitron',sans-serif;
+  background:#000814;
+  color:#fff;
+  line-height:1.6;
+}
+
+/* BACKGROUND */
+canvas{
+  position:fixed;
+  width:100%;
+  height:100%;
+  z-index:0;
+}
+
+section,header{position:relative;z-index:1}
+
+/* HEADER */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 5vw;
+  backdrop-filter:blur(10px);
+  background:rgba(0,0,0,.5);
+}
+
+header img{width:45px}
+
+nav a{
+  margin-left:20px;
+  text-decoration:none;
+  color:#00c3ff;
+  font-size:14px;
+}
+
+/* HERO */
+.hero{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:40px 20px;
+}
+
+.hero h1{
+  font-size:clamp(32px,6vw,60px);
+}
+
+.hero p{
+  max-width:700px;
+  opacity:.8;
+  margin-top:15px;
+}
+
+.cta{
+  margin-top:25px;
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.btn{
+  padding:12px 26px;
+  border-radius:30px;
+  border:none;
+  cursor:pointer;
+  background:linear-gradient(90deg,#00c3ff,#0066ff);
+  color:#fff;
+}
+
+/* GLASS CARD */
+.card{
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(0,195,255,.2);
+  border-radius:20px;
+  padding:25px;
+  backdrop-filter:blur(12px);
+}
+
+/* SECTION */
+.section{
+  padding:80px 20px;
+  text-align:center;
+}
+
+.section h2{
+  color:#00c3ff;
+  margin-bottom:20px;
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+  max-width:1100px;
+  margin:0 auto;
+}
+
+/* CHART */
+.chart-box{
+  max-width:1000px;
+  margin:auto;
+  border-radius:20px;
+  overflow:hidden;
+  border:1px solid rgba(0,195,255,.3);
+}
+
+iframe{
+  width:100%;
+  height:500px;
+  border:none;
+}
+
+/* METRICS */
+.metrics{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:20px;
+}
+
+.metric{
+  padding:15px 20px;
+  border-radius:12px;
+  border:1px solid rgba(0,195,255,.3);
+}
+
+/* FOOTER */
+footer{
+  padding:30px;
+  text-align:center;
+  opacity:.6;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="bg"></canvas>
+
+<header>
+  <img src="logo.png">
+  <nav>
+    <a href="#about">About</a>
+    <a href="#ecosystem">Ecosystem</a>
+    <a href="#chart">Chart</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>A NETWORK</h1>
+  <p>Building the evolution from Web2 → Web3 → Web4 through decentralized AI-powered infrastructure.</p>
+
+  <div class="cta">
+    <button class="btn" onclick="connectWallet()">Connect Wallet</button>
+    <button class="btn" onclick="getPrice()">Live Price</button>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><span id="wallet">Not Connected</span></div>
+    <div class="metric"><span id="price">-</span> USD</div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="section">
+  <h2>Vision</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Decentralization</h3>
+      <p>Empowering users with full control over assets, identity, and data.</p>
+    </div>
+    <div class="card">
+      <h3>AI Integration</h3>
+      <p>Combining artificial intelligence with blockchain to create adaptive systems.</p>
+    </div>
+    <div class="card">
+      <h3>Web4 Evolution</h3>
+      <p>Moving beyond Web3 into a more autonomous and intelligent internet layer.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ECOSYSTEM -->
+<section id="ecosystem" class="section">
+  <h2>Ecosystem</h2>
+  <div class="grid">
+    <div class="card">Payments & Tokenization</div>
+    <div class="card">Decentralized Identity</div>
+    <div class="card">Smart Infrastructure</div>
+    <div class="card">Community Governance</div>
+  </div>
+</section>
+
+<!-- CHART -->
+<section id="chart" class="section">
+  <h2>Live Market</h2>
+  <div class="chart-box">
+    <iframe src="https://dexscreener.com/bsc/0xb90071e377a31a6ea2cfdebe19a4d5226c420b6b?embed=1&theme=dark"></iframe>
+  </div>
+</section>
+
+<footer>
+  © 2026 A Network — Official
+</footer>
+
+<script>
+// BACKGROUND
+const c=document.getElementById('bg');
+const ctx=c.getContext('2d');
+function resize(){c.width=innerWidth;c.height=innerHeight}
+resize();window.addEventListener('resize',resize);
+
+let nodes=[];
+for(let i=0;i<80;i++){
+  nodes.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*0.3,vy:(Math.random()-.5)*0.3});
+}
+
+function animate(){
+  ctx.fillStyle='rgba(0,8,20,.5)';
+  ctx.fillRect(0,0,c.width,c.height);
+
+  nodes.forEach(n=>{
+    n.x+=n.vx;n.y+=n.vy;
+    if(n.x<0||n.x>c.width)n.vx*=-1;
+    if(n.y<0||n.y>c.height)n.vy*=-1;
+
+    ctx.beginPath();
+    ctx.arc(n.x,n.y,2,0,Math.PI*2);
+    ctx.fillStyle='#00c3ff';
+    ctx.fill();
+  });
+
+  requestAnimationFrame(animate);
+}
+animate();
+
+// WEB3
+let provider, signer, userAddress;
+
+async function connectWallet(){
+  if(window.ethereum){
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    signer = provider.getSigner();
+    userAddress = await signer.getAddress();
+
+    document.getElementById("wallet").innerText =
+      userAddress.slice(0,6)+"..."+userAddress.slice(-4);
+  }
+}
+
+async function getPrice(){
+  const res = await fetch("https://api.dexscreener.com/latest/dex/pairs/bsc/0xb90071e377a31a6ea2cfdebe19a4d5226c420b6b");
+  const data = await res.json();
+
+  document.getElementById("price").innerText =
+    parseFloat(data.pair.priceUsd).toFixed(4);
+}
+</script>
+
+</body>
+</html>
